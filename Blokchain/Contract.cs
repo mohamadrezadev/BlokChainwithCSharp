@@ -12,6 +12,7 @@ namespace Blokchain
 	/// </summary>
 	public class Contract : object
     {
+
         public Contract(int initialDifficulty = 0) : base()
         {
             CurrentDifficulty = initialDifficulty;
@@ -19,6 +20,7 @@ namespace Blokchain
                 new List<Block>();
         }
         public int CurrentDifficulty { get; set; }
+
 
         // **********
         private readonly List<Block> _blocks;
@@ -51,6 +53,7 @@ namespace Blokchain
                 new Block(blockNumber: blockNumber, transaction: transaction,
                 difficulty: CurrentDifficulty, parentHash: parentBlock?.MixHash);
             // **********
+
 
             newBlock.Mine();
 
