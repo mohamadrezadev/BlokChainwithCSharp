@@ -10,6 +10,8 @@ namespace Blokchain
     {
         public Block(int blockNumber,Transaction transaction,
             int difficulty = 0, string? parentHash = null) : base()
+        public Block(int blockNumber,
+            Transaction transaction, string? parentHash = null) : base()
         {
             ParentHash = parentHash;
             BlockNumber = Guid.NewGuid().ToString();
@@ -55,12 +57,13 @@ namespace Blokchain
         {
 
             if (string.IsNullOrWhiteSpace(MixHash) == false)
+            if (string.IsNullOrWhiteSpace(MixHash))
             {
                 return;
             }
 
-            Timestamp =
-                Infrastructure.Utility.Now;
+                Timestamp =
+                    Infrastructure.Utility.Now;
 
             var leadingZeros =
                 string.Empty.PadLeft
@@ -78,6 +81,7 @@ namespace Blokchain
                 Nonce++;
 
                 mixHash =
+                MixHash =
                     CalculateMixHash();
             } while (mixHash.StartsWith(leadingZeros) == false);
 
@@ -89,6 +93,7 @@ namespace Blokchain
             Duration =
                 finishTime - startTime;
             // **********
+            }
         }
 
         public string CalculateMixHash()
