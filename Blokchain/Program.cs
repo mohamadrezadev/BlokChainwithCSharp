@@ -22,8 +22,6 @@ var saraAhmadiAccount =
     };
 // **************************************************
 
-//var contract =
-//    new Contract();
 
 //var contract =new Contract(initialDifficulty: 1);
 
@@ -33,6 +31,7 @@ var saraAhmadiAccount =
 var contract =
     new Contract(initialDifficulty: 3);
 // **************************************************
+
 
 // **************************************************
 var transaction1 =
