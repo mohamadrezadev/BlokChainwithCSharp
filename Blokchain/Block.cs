@@ -8,10 +8,9 @@ namespace Blokchain
 {
     public class Block : object
     {
-        public Block(int blockNumber,Transaction transaction,
-            int difficulty = 0, string? parentHash = null) : base()
+       
         public Block(int blockNumber,
-            Transaction transaction, string? parentHash = null) : base()
+            Transaction transaction, int difficulty = 0, string? parentHash = null) : base()
         {
             ParentHash = parentHash;
             BlockNumber = Guid.NewGuid().ToString();
@@ -93,8 +92,8 @@ namespace Blokchain
             Duration =
                 finishTime - startTime;
             // **********
-            }
         }
+        
 
         public string CalculateMixHash()
         {
@@ -135,4 +134,5 @@ namespace Blokchain
         }
     }
 }
+
 

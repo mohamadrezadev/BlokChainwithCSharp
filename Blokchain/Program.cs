@@ -29,8 +29,8 @@ var saraAhmadiAccount =
 //	new Contract(initialDifficulty: 2);
 
 var contract =
-    new Contract();
-    new Contract(initialDifficulty: 3);
+    
+    new Contract(initialDifficulty: 1);
 // **************************************************
 
 
