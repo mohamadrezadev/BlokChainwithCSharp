@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blokchain.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,31 +9,22 @@ namespace Blokchain
 {
     public class Block : object
     {
-       
         public Block(int blockNumber,
-            Transaction transaction, int difficulty = 0, string? parentHash = null) : base()
+             int difficulty = 0, string? previousBlock = null) : base()
         {
-            ParentHash = parentHash;
+            PreviousHash =previousBlock;
             BlockNumber = Guid.NewGuid().ToString();
-            Transaction = transaction;
+            _transactions =new List<Transaction>();
             Difficulty = difficulty;
         }
-
         /// <summary>
         /// Index
         /// </summary>
         public string BlockNumber { get; }
-
         /// <summary>
         /// PreviousHash
         /// </summary>
-        public string? ParentHash { get; }
-
-        /// <summary>
-        /// Data
-        /// </summary>
-        public Transaction Transaction { get; }
-
+        public string? PreviousHash { get; }
         /// <summary>
         /// Hash
         /// </summary>
@@ -43,34 +35,50 @@ namespace Blokchain
         /// Note: It is Mining Time, NOT Creation Time!
         /// </summary>
         public DateTime? Timestamp { get; protected set; }
-
-        // **********
         public int Difficulty { get; }
-
         public int Nonce { get; protected set; }
-
         public TimeSpan? Duration { get; protected set; }
-        // **********
+        /// <summary>
+        /// Data
+        /// </summary>
+        private readonly List<Transaction> _transactions;
 
+        public IReadOnlyList<Transaction> Transactions
+        {
+            get
+            {
+                return _transactions;
+            }
+        }
+        // **********
+        public void AddTransaction(Transaction transaction)
+        {
+            _transactions.Add(transaction);
+        }
+        // **********
+        public bool IsMined()
+        {
+            if (string.IsNullOrWhiteSpace(MixHash))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
         public void Mine()
         {
 
-            if (string.IsNullOrWhiteSpace(MixHash) == false)
-            if (string.IsNullOrWhiteSpace(MixHash))
+            if (IsMined())
             {
                 return;
             }
 
-                Timestamp =
-                    Infrastructure.Utility.Now;
+            Timestamp =Utility.Now;
+            var leadingZeros =new string(c: '0', count: Difficulty);
 
-            var leadingZeros =
-                string.Empty.PadLeft
-                (totalWidth: Difficulty, paddingChar: '0');
-
-            // **********
-            var startTime =
-                Infrastructure.Utility.Now;
+            var startTime =Utility.Now;
 
             Nonce = -1;
             string mixHash;
@@ -80,25 +88,21 @@ namespace Blokchain
                 Nonce++;
 
                 mixHash =
-                MixHash =
-                    CalculateMixHash();
+                    MixHash =CalculateMixHash();
             } while (mixHash.StartsWith(leadingZeros) == false);
 
             MixHash = mixHash;
 
-            var finishTime =
-                Infrastructure.Utility.Now;
+            var finishTime =Utility.Now;
 
-            Duration =
-                finishTime - startTime;
+            Duration =finishTime - startTime;
             // **********
         }
         
 
         public string CalculateMixHash()
         {
-            var stringBuilder =
-                new System.Text.StringBuilder();
+            var stringBuilder =new StringBuilder();
 
             // **********
             stringBuilder.Append($"{nameof(Nonce)}:{Nonce}");
@@ -109,18 +113,17 @@ namespace Blokchain
 
             stringBuilder.Append($"{nameof(Timestamp)}:{Timestamp}");
             stringBuilder.Append('|');
-            stringBuilder.Append($"{nameof(ParentHash)}:{ParentHash}");
+            stringBuilder.Append($"{nameof(PreviousHash)}:{PreviousHash}");
             stringBuilder.Append('|');
             stringBuilder.Append($"{nameof(BlockNumber)}:{BlockNumber}");
+            // **********
+            var transactionsString =Utility.ConvertObjectToJson(Transactions);
             stringBuilder.Append('|');
-            stringBuilder.Append($"{nameof(Transaction)}:{Transaction}");
-
+            stringBuilder.Append($"{nameof(Transactions)}:{transactionsString}");
+            // **********
             var text =
                 stringBuilder.ToString();
-
-            string result =
-                Infrastructure.Utility.GetSha256(text: text);
-
+            string result =Utility.GetSha256(text: text);
             return result;
         }
 

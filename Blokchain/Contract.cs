@@ -22,14 +22,6 @@ namespace Blokchain
         }
         public int CurrentDifficulty { get; set; }
 
-
-        public Contract() : base()
-        {
-            _blocks =
-                new List<Block>();
-        }
-
-
         // **********
         private readonly List<Block> _blocks;
 
@@ -41,50 +33,95 @@ namespace Blokchain
             }
         }
         // **********
+        private List<Transaction> _pendingTransactions;
 
-        public void AddTransactionAndMineBlock(Transaction transaction)
+        /// <summary>
+        /// Memory Pool = MemPool
+        /// </summary>
+        public IReadOnlyList<Transaction> PendingTransactions
         {
-            Block? parentBlock = null;
+            get
+            {
+                return _pendingTransactions.AsReadOnly();
+            }
+        }
+        // **********
+
+        public void AddTransaction(Transaction transaction)
+        {
+            // **********
+            switch (transaction.Type)
+            {
+                case TransactionType.Withdrawing:
+                case TransactionType.Transferring:
+                    {
+                        float senderBalance =
+                            GetAccountBalance(accountAddress: transaction.SenderAccountAddress!);
+
+                        if (senderBalance < transaction.Amount)
+                        {
+                            return;
+                        }
+
+                        break;
+                    }
+            }
+            // **********
+
+            _pendingTransactions.Add(transaction);
+        }
+        // **********
+        private Block GetNewBlock()
+        {
+            Block? PreviousBlock = null;
             int blockNumber = Blocks.Count;
 
             if (blockNumber != 0)
             {
-                parentBlock =
-                    Blocks[blockNumber - 1];
+                PreviousBlock = Blocks[blockNumber - 1];
             }
 
-            //var newBlock =
-            //    new Block(blockNumber: blockNumber,
-            //    transaction: transaction, parentHash: parentBlock?.MixHash);
-            // **********
-            var newBlock =
-                new Block(blockNumber: blockNumber, transaction: transaction,
-                difficulty: CurrentDifficulty, parentHash: parentBlock?.MixHash);
-            // **********
+            var newBlock =new Block(blockNumber: blockNumber,
+                                difficulty: CurrentDifficulty, previousBlock: PreviousBlock?.MixHash);
 
-
-
-            newBlock.Mine();
-
-            _blocks.Add(newBlock);
+            return newBlock;
         }
+        // **********
+        // **********
+        public Block Mine()
+        {
+            var block =GetNewBlock();
+
+            foreach (var transaction in PendingTransactions)
+            {
+                block.AddTransaction(transaction);
+            }
+
+            _pendingTransactions =new List<Transaction>();
+
+            block.Mine();
+
+            _blocks.Add(block);
+
+            return block;
+        }
+        // **********
         public bool IsValid()
         {
            
             for (int index = 1; index <= Blocks.Count - 1; index++)
             {
                 var currentBlock = Blocks[index];
-                var parentBlock = Blocks[index - 1];
+                var PreviousBlock = Blocks[index - 1];
                
-                var currentMixHash =
-                    currentBlock.CalculateMixHash();
+                var currentMixHash =currentBlock.CalculateMixHash();
 
                 if (currentBlock.MixHash != currentMixHash)
                 {
                     return false;
                 }
 
-                if (currentBlock.ParentHash != parentBlock.MixHash)
+                if (currentBlock.PreviousHash != PreviousBlock.MixHash)
                 {
                     return false;
                 }
@@ -95,29 +132,43 @@ namespace Blokchain
 
         public float GetAccountBalance(string accountAddress)
         {
+            if (IsValid() == false)
+            {
+                return 0;
+            }
+
             float balance = 0;
-            if (!IsValid())
-            {
-                return balance;
-            }
 
-            foreach (var block in Blocks)
+            foreach (var block in _blocks)
             {
-                if (block.Transaction.RecipientAccountAddress == accountAddress)
+                foreach (var transaction in block.Transactions)
                 {
-                    balance +=
-                        block.Transaction.Amount;
-                }
+                    if (transaction.RecipientAccountAddress == accountAddress)
+                    {
+                        balance +=transaction.Amount;
+                    }
 
-                if (block.Transaction.SenderAccountAddress == accountAddress)
-                {
-                    balance -=
-                        block.Transaction.Amount;
+                    if (transaction.SenderAccountAddress == accountAddress)
+                    {
+                        balance -=transaction.Amount;
+                    }
                 }
             }
+
+           
+            // **********
+            foreach (var transaction in _pendingTransactions)
+            {
+                if (transaction.SenderAccountAddress == accountAddress)
+                {
+                    balance -=transaction.Amount;
+                }
+            }
+            // **********
 
             return balance;
         }
+
 
         public override string ToString()
         {
