@@ -14,13 +14,20 @@ namespace Blokchain
     {
 
 
-        public Contract(int initialDifficulty = 0) : base()
+        public Contract(int initialDifficulty = 0,
+            double currentMiningReward = 0,
+            double currentMinimumTransactionFee = 0) : base()
         {
             CurrentDifficulty = initialDifficulty;
+            CurrentMinimumTransactionFee = currentMinimumTransactionFee;
+            CurrentMiningReward = currentMiningReward;
             _blocks =
                 new List<Block>();
         }
         public int CurrentDifficulty { get; set; }
+        public double CurrentMiningReward { get; set; }
+
+        public double CurrentMinimumTransactionFee { get; set; }
 
         // **********
         private readonly List<Block> _blocks;
@@ -47,30 +54,34 @@ namespace Blokchain
         }
         // **********
 
-        public void AddTransaction(Transaction transaction)
+        public bool AddTransaction(Transaction transaction)
         {
-            // **********
+            if (transaction.Fee < CurrentMinimumTransactionFee)
+            {
+                return false;
+            }
+
             switch (transaction.Type)
             {
                 case TransactionType.Withdrawing:
                 case TransactionType.Transferring:
                     {
-                        float senderBalance =
+                        double senderBalance =
                             GetAccountBalance(accountAddress: transaction.SenderAccountAddress!);
 
                         if (senderBalance < transaction.Amount)
                         {
-                            return;
+                            return false;
                         }
 
                         break;
                     }
             }
-            // **********
 
             _pendingTransactions.Add(transaction);
+
+            return true;
         }
-        // **********
         private Block GetNewBlock()
         {
             Block? PreviousBlock = null;

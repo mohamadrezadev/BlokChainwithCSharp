@@ -114,7 +114,7 @@ Transaction transaction;
 
 // ************************************************** 
 var transaction1  =
-    new Transaction(amount: 10,
+    new Transaction(amount: 10, fee: .01,
     type: TransactionType.Charging,
     recipientAccountAddress: dariushTasdighiAccount.Address);
 
@@ -123,7 +123,7 @@ contract.AddTransaction(transaction1);
 
 // **************************************************
 var transaction2 =
-    new Transaction(amount: 50,
+    new Transaction(amount: 50,fee:.01,
     type: TransactionType.Charging,
     recipientAccountAddress: aliRezaAlaviAccount.Address);
 
@@ -132,7 +132,7 @@ contract.AddTransaction(transaction2);
 
 // **************************************************
 var transaction3 =
-    new Transaction(amount: 20,
+    new Transaction(amount: 20, fee: .01,
     type: TransactionType.Transferring,
     senderAccountAddress: aliRezaAlaviAccount.Address,
     recipientAccountAddress: dariushTasdighiAccount.Address);
@@ -142,7 +142,7 @@ contract.AddTransaction(transaction3);
 
 // **************************************************
 var transaction4 =
-    new Transaction(amount: 5,
+    new Transaction(amount: 5, fee: .01,
     type: TransactionType.Transferring,
     senderAccountAddress: dariushTasdighiAccount.Address,
     recipientAccountAddress: saraAhmadiAccount.Address);

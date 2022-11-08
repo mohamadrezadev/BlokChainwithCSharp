@@ -10,7 +10,8 @@ namespace Blokchain
     public class Transaction : object
     {
         public Transaction
-            (int amount,
+            (double fee,
+            float amount,
             TransactionType type,
             string? senderAccountAddress = null,
             string? recipientAccountAddress = null) : base()
@@ -83,6 +84,7 @@ namespace Blokchain
         public Guid Id { get; }
 
         public float Amount { get; set; }
+        public double Fee { get; }
 
         public DateTime Timestamp { get; }
 
